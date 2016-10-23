@@ -5,113 +5,96 @@
         <title>Pagos</title>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script type="text/javascript" src="https://conektaapi.s3.amazonaws.com/v0.5.0/js/conekta.js"></script>
+        <style media="screen">
+          .text-center  { text-align: center; }
+          .padding-up { margin: 5% 0; }
+          .exp { max-width: 33%; }
+          .button { width: 80%; height: 80px; }
+          .card-errors { color: red; }
+        </style>
+      </head>
+      <body>
+        <main class="container">
+          <h1 class="text-center padding-up">Hello, beauty. You're at the conekta index.</h1>
+          <form action="" method="POST" id="card-form" class="text-center">
+            {% csrf_token %}
+            <span class="card-errors"></span>
+            <div class="grid">
+              <div class="field cell-6">
+                <label class="label">Card Name</label>
+                <input type="text" size="20" data-conekta="card[name]" class="input"/>
+              </div>
+              <div class="field cell-6">
+                <label class="label">Card Number</label>
+                <input type="text" size="20" data-conekta="card[number]" class="input"/>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="field cell-8">
+                <label class="label">Expiration Date (MM/AAAA)</label>
+                <div class="grid">
+                  <input type="text" size="2" data-conekta="card[exp_month]" class="input cell-4 exp"/>
+                  <span class="cell-4 exp">/</span>
+                  <input type="text" size="4" data-conekta="card[exp_year]" class="input cell-4 exp"/>
+                </div>
+              </div>
+              <div class="field cell-4">
+                <label class="label">CVC</label>
+                <input type="password" size="4" data-conekta="card[cvc]" class="input"/>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="field cell-4">
+                <label class="label">Address</label>
+                <input type="text" size="25" data-conekta="card[address][street1]" class="input"/>
+              </div>
+              <div class="field cell-4">
+                <label class="label">Address 2</label>
+                <input type="text" size="25" data-conekta="card[address][street2]" class="input"/>
+              </div>
+              <div class="field cell-4">
+                <label class="label">City</label>
+                <input type="text" size="25" data-conekta="card[address][city]" class="input"/>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="field cell-4">
+                <label class="label">State</label>
+                <input type="text" size="25" data-conekta="card[address][state]" class="input"/>
+              </div>
+              <div class="field cell-4">
+                <label class="label">ZIP</label>
+                <input type="text" size="5" data-conekta="card[address][zip]" class="input"/>
+              </div>
+              <div class="field cell-4">
+                <label class="label">Country</label>
+                <input type="text" size="25" data-conekta="card[address][country]" class="input"/>
+              </div>
+            </div>
+            <button type="submit" class="button">Charge me, babe!</button>
+          </form>
+        </main>
         <script type="text/javascript">
-
-         // Conekta Public Key
-          Conekta.setPublishableKey('key_MyrGAZYQkcAkwjkcMcxbnGQ'); //v3.2
-         //Conekta.setPublicKey('key_KJysdbf6PotS2ut2'); //v5+
-
-         // ...
-         $(function () {
-          $("#card-form").submit(function(event) {
-            var $form = $(this);
-
-            // Previene hacer submit más de una vez
-            $form.find("button").prop("disabled", true);
-            Conekta.token.create($form, conektaSuccessResponseHandler, conektaErrorResponseHandler);
-           //Conekta.Token.create($form, conektaSuccessResponseHandler, conektaErrorResponseHandler); //v5+
-
-            // Previene que la información de la forma sea enviada al servidor
-            return false;
+          Conekta.setPublishableKey('key_MyrGAZYQkcAkwjkcMcxbnGQ');
+          $(function () {
+            $("#card-form").submit(function(event) {
+              var $form = $(this);
+              $form.find("button").prop("disabled", true); //Prevents double click
+              Conekta.token.create($form, conektaSuccessResponseHandler, conektaErrorResponseHandler);
+              return false;
+            });
           });
           var conektaSuccessResponseHandler = function(token) {
-              var $form = $("#card-form");
-
-              /* Inserta el token_id en la forma para que se envíe al servidor */
-              $form.append($("<input type='hidden' name='conektaTokenId'>").val(token.id));
-
-              /* and submit */
-              $form.get(0).submit();
-            };
-
+            var $form = $("#card-form");
+            $form.append($("<input type='hidden' name='conektaTokenId'>").val(token.id)); //Add hidden input with token_id
+            console.log(token.id);
+            $form.get(0).submit();
+          };
           var conektaErrorResponseHandler = function(response) {
-              var $form = $("#card-form");
-
-              /* Muestra los errores en la forma */
-              $form.find(".card-errors").text(response.message_to_purchaser);
-              $form.find("button").prop("disabled", false);
-            };
-        });
+            var $form = $("#card-form");
+            $form.find(".card-errors").text(response.message_to_purchaser); //Display the error
+            $form.find("button").prop("disabled", false);
+          };
         </script>
-    </head>
-    <body>
-        <form action="" method="POST" id="card-form">
-          <span class="card-errors"></span>
-          <div class="form-row">
-            <label>
-              <span>Nombre del tarjetahabiente</span>
-              <input type="text" size="20" data-conekta="card[name]"/>
-            </label>
-          </div>
-          <div class="form-row">
-            <label>
-              <span>Número de tarjeta de crédito</span>
-              <input type="text" size="20" data-conekta="card[number]"/>
-            </label>
-          </div>
-          <div class="form-row">
-            <label>
-              <span>CVC</span>
-              <input type="text" size="4" data-conekta="card[cvc]"/>
-            </label>
-          </div>
-          <div class="form-row">
-            <label>
-              <span>Fecha de expiración (MM/AAAA)</span>
-              <input type="text" size="2" data-conekta="card[exp_month]"/>
-            </label>
-            <span>/</span>
-            <input type="text" size="4" data-conekta="card[exp_year]"/>
-          </div>
-        <!-- Información recomendada para sistema antifraude -->
-          <div class="form-row">
-            <label>
-              <span>Calle</span>
-              <input type="text" size="25" data-conekta="card[address][street1]"/>
-            </label>
-          </div>
-        <div class="form-row">
-            <label>
-              <span>Colonia</span>
-              <input type="text" size="25" data-conekta="card[address][street2]"/>
-            </label>
-          </div>
-        <div class="form-row">
-            <label>
-              <span>Ciudad</span>
-              <input type="text" size="25" data-conekta="card[address][city]"/>
-            </label>
-          </div>
-        <div class="form-row">
-            <label>
-              <span>Estado</span>
-              <input type="text" size="25" data-conekta="card[address][state]"/>
-            </label>
-          </div>
-        <div class="form-row">
-            <label>
-              <span>CP</span>
-              <input type="text" size="5" data-conekta="card[address][zip]"/>
-            </label>
-          </div>
-        <div class="form-row">
-            <label>
-              <span>País</span>
-              <input type="text" size="25" data-conekta="card[address][country]"/>
-            </label>
-          </div>
-          <button type="submit">¡Pagar ahora!</button>
-        </form>
-
-    </body>
-</html>
+      </body>
+      </html>

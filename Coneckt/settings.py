@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 ]
 
 CONEKTA_PRIVATE_KEY = 'key_eYvWV7gSDkNYXsmr'
+CONEKTA_LOCALE = 'es'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
